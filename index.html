@@ -7,33 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ======== 老師登入與班級選擇 ======== */
-        #teacher-bar {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 200;
-            background: rgba(255,255,255,0.9);
-            border: 3px solid #000;
-            padding: 6px 10px;
-            border-radius: 999px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-            font-size: 12px;
-        }
-        #teacher-bar input,
-        #teacher-bar select {
-            font-size: 12px;
-            padding: 4px 6px;
-        }
-        #teacher-status {
-            font-size: 12px;
-            color: #2563eb;
-            min-width: 80px;
-        }
         :root {
             --board-bg: #cde6d0;
             --center-bg: #fbf8ef;
@@ -485,16 +458,7 @@
     </style>
 </head>
 <body>
-    <div id="teacher-bar">
-        <span>老師登入：</span>
-        <input id="login-email" type="email" placeholder="Email">
-        <input id="login-password" type="password" placeholder="密碼">
-        <button id="login-button" type="button" onclick="handleLogin()">登入</button>
-        <select id="class-select">
-            <option value="">班級...</option>
-        </select>
-        <span id="teacher-status"></span>
-    </div>
+
 <div id="settings-modal" class="modal-overlay">
     <div class="modal-content">
         <h2 data-i18n="modalTitle">🛠️ 系統設定</h2>
@@ -594,78 +558,7 @@
 
     </div>
 </div>
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    const SUPABASE_URL = 'https://doeogfdfvwjyusxkpxrm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZW9nZmRmdndqeXVzeGtweHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzY5NjYsImV4cCI6MjA4ODQ1Mjk2Nn0.yHcvjaqYIvUnwUa-hbl1WxJ1L93_WRlgfKxw9d9yxRE';
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabaseClient = supabase; // 之後其他 script 也能用
-
-    let currentTeacherId = null;
-
-    async function handleLogin() {
-        const emailEl = document.getElementById('login-email');
-        const passwordEl = document.getElementById('login-password');
-        const statusEl = document.getElementById('teacher-status');
-        const loginBtn = document.getElementById('login-button');
-
-        statusEl.textContent = '登入中...';
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: emailEl.value.trim(),
-            password: passwordEl.value,
-        });
-
-        if (error) {
-            console.error(error);
-            statusEl.textContent = '登入失敗';
-            return;
-        }
-
-        currentTeacherId = data.user.id;
-        statusEl.textContent = '已登入';
-        emailEl.disabled = true;
-        passwordEl.disabled = true;
-        loginBtn.disabled = true;
-
-        await loadClasses();
-    }
-    window.handleLogin = handleLogin; // 給 HTML 的 onclick 用
-
-    async function loadClasses() {
-        if (!currentTeacherId) return;
-
-        const statusEl = document.getElementById('teacher-status');
-        const classSelect = document.getElementById('class-select');
-
-        statusEl.textContent = '載入班級中...';
-
-        const { data: classes, error } = await supabase
-            .from('classes')
-            .select('*')
-            .eq('teacher_id', currentTeacherId)
-            .order('name', { ascending: true });
-
-        if (error) {
-            console.error(error);
-            statusEl.textContent = '載入班級失敗';
-            return;
-        }
-
-        classSelect.innerHTML = '<option value="">班級...</option>';
-        for (const cls of classes) {
-            const opt = document.createElement('option');
-            opt.value = cls.id;
-            opt.textContent = cls.name;
-            classSelect.appendChild(opt);
-        }
-
-        statusEl.textContent = '班級已載入';
-    }
-    window.loadClasses = loadClasses;
-</script>
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxklt9GvSHTJzJBIL-MlwUfHLJtlWDMeaaquDb96A-yPjaH9hUi4yCCVClQ3iH8Yy-K/exec';
 
